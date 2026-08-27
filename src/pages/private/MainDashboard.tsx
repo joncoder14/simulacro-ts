@@ -7,23 +7,24 @@ import { post } from "../../services/post"
 
 function MainDashboard() {
     const [category, setCategory] = useState<Category[]>([])
-    const [loading, setLoading] = useState(Boolean) 
+    const [loading, setLoading] = useState(Boolean)
+    const [creating, setCreating] = useState(false)
     const storedUser = localStorage.getItem("user")
-    const user: User|null = storedUser ? JSON.parse(storedUser) : null
+    const user: User | null = storedUser ? JSON.parse(storedUser) : null
     const [showModal, setShowModal] = useState(false)
     const [formData, setFormData] = useState({
-        name:"",
-        description:"",
+        name: "",
+        description: "",
     })
 
 
     useEffect(() => {
         const fetchCategories = async () => {
-            try{
+            try {
 
                 const categories = await get<Category[]>("categories")
                 setCategory(categories)
-            } catch(error){
+            } catch (error) {
                 console.log(error)
             } finally {
                 setLoading(false)
@@ -35,18 +36,22 @@ function MainDashboard() {
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault()
-        try{
-            const response  = await post<Category, CreateCategory>("categories",formData)
-            response
+        try {
+            setCreating(true)
+            const newCategory = await post<Category, CreateCategory>("categories", formData)
+            setCategory(prev => [...prev, newCategory])
+
             alert("categorie created")
             setShowModal(false)
-                setFormData({
-            name: "",
-            description: "",
-        });
-        } catch(error){
+            setFormData({
+                name: "",
+                description: "",
+            });
+        } catch (error) {
             console.log(error)
             alert("error")
+        } finally {
+            setCreating(false)
         }
     }
 
@@ -55,7 +60,7 @@ function MainDashboard() {
         <>
 
             <div className="flex justify-end p-6 pb-0">
-                {user?.role === "admin" && (    
+                {user?.role === "admin" && (
 
                     <button onClick={() => setShowModal(true)}
                         className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition"
@@ -81,7 +86,7 @@ function MainDashboard() {
                             </button>
                         </div>
 
-                        <form>
+                        <form onSubmit={handleSubmit}>
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Name
@@ -91,7 +96,7 @@ function MainDashboard() {
                                     type="text"
                                     placeholder="Category name"
                                     value={formData.name}
-                                    onChange={(e)=>{
+                                    onChange={(e) => {
                                         setFormData({
                                             ...formData,
                                             name: e.target.value
@@ -109,7 +114,7 @@ function MainDashboard() {
                                 <textarea
                                     placeholder="Category description"
                                     value={formData.description}
-                                    onChange={(e)=>{
+                                    onChange={(e) => {
                                         setFormData({
                                             ...formData,
                                             description: e.target.value
@@ -117,6 +122,11 @@ function MainDashboard() {
                                     }}
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 outline-none focus:border-blue-500"
                                 />
+                                {creating && (
+                                    <p className="text-sm text-blue-600 mt-2">
+                                        Creating category...
+                                    </p>
+                                )}
                             </div>
 
                             <div className="flex justify-end gap-3">
@@ -129,10 +139,10 @@ function MainDashboard() {
                                 </button>
 
                                 <button
-                                    type="submit"
+                                    disabled={creating}
                                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                                 >
-                                    Create
+                                    {creating ? "Creating..." : "Create"}
                                 </button>
                             </div>
                         </form>
@@ -140,23 +150,28 @@ function MainDashboard() {
                     </div>
                 </div>
             )}
+            {loading ? (<p> loading</p>) : (
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 p-6">
-                {category.map((item) => (
-                    <article
-                        key={item.id}
-                        className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition"
-                    >
-                        <h2 className="text-xl font-semibold text-gray-800 mb-2">
-                            {item.name}
-                        </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 p-6">
+                    {category.map((item) => (
+                        <article
+                            key={item.id}
+                            className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition"
+                        >
+                            <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                                {item.name}
+                            </h2>
 
-                        <p className="text-gray-500 text-sm leading-relaxed">
-                            {item.description}
-                        </p>
-                    </article>
-                ))}
-            </div>
+                            <p className="text-gray-500 text-sm leading-relaxed">
+                                {item.description}
+                            </p>
+                        </article>
+                    ))}
+                </div>
+            )}
+
+
+
         </>
     )
 }
