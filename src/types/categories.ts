@@ -10,3 +10,8 @@ export type Category = {
 }
 
 export type CreateCategory = Pick<Category, "name" | "description">;
+
+export type EditCategory = {
+    name?:string,
+    description?:string
+}

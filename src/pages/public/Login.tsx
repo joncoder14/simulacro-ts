@@ -3,8 +3,7 @@ import { post } from "../../services/post"
 import { useAuth } from "../../context/AuthContext"
 import type { UserResponse } from "../../types/user"
 import { useNavigate } from "react-router-dom"
-import type { User } from "../../types/user"
-
+import { Link } from "react-router-dom"
 
 
 function Login (){
@@ -90,6 +89,8 @@ function Login (){
     >
       Sign in
     </button>
+    <Link to={"/register"}>register here</Link>
+    
   </form>
 </div>
 );

@@ -4,6 +4,7 @@ import Login from "./pages/public/Login";
 import MainLatyout from "./components/Mainlayout";
 import { requirsAuth } from "./loaders/authLoader";
 import MainDashboard from "./pages/private/MainDashboard";
+import Register from "./pages/public/Register";
 
 export const router = createBrowserRouter([{
     path:"/",
@@ -11,7 +12,12 @@ export const router = createBrowserRouter([{
     children:[{
         index:true,
         element:<Login/>
-    }],
+    },
+    {
+        path:"register",
+        element:<Register/>
+    }
+],
 },
 {
     path:"/",
